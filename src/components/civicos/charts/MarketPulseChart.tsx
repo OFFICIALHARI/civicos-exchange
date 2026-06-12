@@ -29,7 +29,7 @@ export function MarketPulseChart({ data }: { data: TrendPoint[] }) {
             borderRadius: 8, fontSize: 12, color: "oklch(0.97 0 0)",
           }}
           labelStyle={{ color: "oklch(0.66 0 0)" }}
-          formatter={(v: number) => [`+${v}`, "value"]}
+          formatter={(v) => [`+${v}`, "value"]}
         />
         <Bar dataKey="volume" fill="oklch(0.27 0 0)" radius={[2, 2, 0, 0]} maxBarSize={3} />
         <Area
