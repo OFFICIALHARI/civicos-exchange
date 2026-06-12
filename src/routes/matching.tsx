@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell, PageHeader } from "@/components/civicos/AppShell";
 import { Card, CardBody, CardHeader } from "@/components/civicos/Card";
-import { useMatches, useRequests, useResources } from "@/lib/civicos/hooks";
+import { useMatches, useRequests, useResources, useExecuteMatching } from "@/lib/civicos/hooks";
 import { MatchCard } from "@/components/civicos/MatchCard";
 import { StatusBadge, UrgencyBadge } from "@/components/civicos/StatusBadge";
 import { Skeleton } from "@/components/civicos/LoadingSkeletons";
-import { Activity, Play } from "lucide-react";
+import { Activity, Play, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/matching")({
   head: () => ({ meta: [{ title: "Live Matching · CivicOS" }, { name: "description", content: "Real-time supply/demand matching engine for community resources." }] }),
@@ -16,6 +17,22 @@ function Matching() {
   const { data: resources, isLoading: lr } = useResources();
   const { data: requests, isLoading: lq } = useRequests();
   const { data: matches, isLoading: lm } = useMatches();
+  const { mutate: runMatching, isPending: isRunning } = useExecuteMatching();
+
+  const handleRunMatching = () => {
+    runMatching(undefined, {
+      onSuccess: (report) => {
+        if (report.status === "empty") {
+          toast.info("No matches found in this cycle.");
+        } else {
+          toast.success(`Matching cycle complete: ${report.summary.totalMatchesFound} matches created.`);
+        }
+      },
+      onError: (error) => {
+        toast.error(`Matching failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+      }
+    });
+  };
 
   return (
     <AppShell>
@@ -23,8 +40,13 @@ function Matching() {
         title="Live Matching"
         subtitle="Supply ↔ Engine ↔ Demand"
         actions={
-          <button className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90">
-            <Play className="h-3.5 w-3.5" /> Run Cycle
+          <button 
+            onClick={handleRunMatching}
+            disabled={isRunning}
+            className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+          >
+            {isRunning ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
+            Run Cycle
           </button>
         }
       />

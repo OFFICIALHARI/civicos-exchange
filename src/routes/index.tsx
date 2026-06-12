@@ -2,9 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppShell, PageHeader } from "@/components/civicos/AppShell";
 import { TrendChartCard } from "@/components/civicos/TrendChartCard";
 import { MetricCard } from "@/components/civicos/MetricCard";
-import { useMetrics } from "@/lib/civicos/hooks";
+import { useMetrics, useExecuteMatching } from "@/lib/civicos/hooks";
 import { ActivityFeed, AIRecommendation, ImpactScoreMeter, LiveMatchStatus } from "@/components/civicos/RightContextPanel";
-import { Play, Plus } from "lucide-react";
+import { Play, Plus, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -20,6 +21,22 @@ export const Route = createFileRoute("/")({
 
 function Dashboard() {
   const { data: m, isLoading } = useMetrics();
+  const { mutate: runMatching, isPending: isRunning } = useExecuteMatching();
+
+  const handleRunMatching = () => {
+    runMatching(undefined, {
+      onSuccess: (report) => {
+        if (report.status === "empty") {
+          toast.info("No matches found in this cycle.");
+        } else {
+          toast.success(`Matching complete: ${report.summary.totalMatchesFound} matches created.`);
+        }
+      },
+      onError: (error) => {
+        toast.error(`Matching failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+      }
+    });
+  };
 
   return (
     <AppShell
@@ -40,8 +57,13 @@ function Dashboard() {
             <button className="hidden sm:inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-3 py-1.5 text-xs hover:bg-elevated">
               <Plus className="h-3.5 w-3.5" /> Add Resource
             </button>
-            <button className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90">
-              <Play className="h-3.5 w-3.5" /> Run Matching
+            <button 
+              onClick={handleRunMatching}
+              disabled={isRunning}
+              className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+            >
+              {isRunning ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
+              Run Matching
             </button>
           </>
         }

@@ -17,10 +17,21 @@ import process from "node:process";
 //     VITE_ prefix. Never put secrets here — they ship to the browser.
 
 export function getServerConfig() {
+  const readRequiredEnv = (key: string) => {
+    const value = process.env[key]?.trim();
+
+    if (!value) {
+      throw new Error(
+        `Missing required server environment variable: ${key}. Add ${key}= to your .env file.`,
+      );
+    }
+
+    return value;
+  };
+
   return {
     nodeEnv: process.env.NODE_ENV,
-    // Add server-only values here, e.g.:
-    //   databaseUrl: process.env.DATABASE_URL,
-    //   stripeSecretKey: process.env.STRIPE_SECRET_KEY,
+    mongodbUri: readRequiredEnv("MONGODB_URI"),
+    databaseName: readRequiredEnv("DATABASE_NAME"),
   };
 }
