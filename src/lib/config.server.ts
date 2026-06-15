@@ -29,9 +29,11 @@ export function getServerConfig() {
     return value;
   };
 
-  return {
+  const config = {
     nodeEnv: process.env.NODE_ENV,
     mongodbUri: readRequiredEnv("MONGODB_URI"),
     databaseName: readRequiredEnv("DATABASE_NAME"),
   };
+
+  return config;
 }

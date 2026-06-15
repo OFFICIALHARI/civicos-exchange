@@ -4,7 +4,10 @@ import { z } from "zod";
 const objectIdSchema = z
   .union([
     z.instanceof(ObjectId),
-    z.string().trim().regex(/^[a-fA-F0-9]{24}$/, "Expected a MongoDB ObjectId string"),
+    z
+      .string()
+      .trim()
+      .regex(/^[a-fA-F0-9]{24}$/, "Expected a MongoDB ObjectId string"),
   ])
   .transform((value) => (typeof value === "string" ? new ObjectId(value) : value));
 
@@ -21,7 +24,7 @@ export const LedgerEntrySchema = z.object({
 });
 
 export type LedgerEntryDocument = z.infer<typeof LedgerEntrySchema>;
-export interface LedgerEntry extends LedgerEntryDocument {}
+export type LedgerEntry = LedgerEntryDocument;
 
 export const LedgerEntryCreateInputSchema = LedgerEntrySchema.omit({
   _id: true,

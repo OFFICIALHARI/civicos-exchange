@@ -26,7 +26,12 @@ function durationInDays(start: Date, end: Date): number {
   return Math.max((end.getTime() - start.getTime()) / MILLISECONDS_PER_DAY, 0);
 }
 
-function overlapInDays(resourceStart: Date, resourceEnd: Date, requestStart: Date, requestEnd: Date): number {
+function overlapInDays(
+  resourceStart: Date,
+  resourceEnd: Date,
+  requestStart: Date,
+  requestEnd: Date,
+): number {
   const overlapStart = Math.max(resourceStart.getTime(), requestStart.getTime());
   const overlapEnd = Math.min(resourceEnd.getTime(), requestEnd.getTime());
   return Math.max((overlapEnd - overlapStart) / MILLISECONDS_PER_DAY, 0);
@@ -69,12 +74,20 @@ export function calculateTimeMatch(resource: ResourceDocument, request: RequestD
   }
 
   // When durations are similar, the timing fit is better; large duration gaps reduce the score.
-  const durationSimilarity = 1 - Math.min(Math.abs(resourceDuration - requestDuration) / Math.max(resourceDuration, requestDuration, 1), 1);
+  const durationSimilarity =
+    1 -
+    Math.min(
+      Math.abs(resourceDuration - requestDuration) / Math.max(resourceDuration, requestDuration, 1),
+      1,
+    );
   return clamp01(availabilityMatch * durationSimilarity);
 }
 
 // Location compatibility rewards exact or near-exact textual matches for the current backend-only phase.
-export function calculateLocationMatch(resource: ResourceDocument, request: RequestDocument): number {
+export function calculateLocationMatch(
+  resource: ResourceDocument,
+  request: RequestDocument,
+): number {
   const resourceLocation = normalizeText(resource.location);
   const requestLocation = normalizeText(request.location);
 
@@ -127,7 +140,10 @@ export function calculatePriorityMatch(request: RequestDocument): number {
 }
 
 // Availability acts as both an eligibility filter and a modifier: no overlap means no match.
-export function calculateAvailabilityMatch(resource: ResourceDocument, request: RequestDocument): number {
+export function calculateAvailabilityMatch(
+  resource: ResourceDocument,
+  request: RequestDocument,
+): number {
   const overlap = overlapInDays(
     resource.availability.start,
     resource.availability.end,
@@ -143,7 +159,10 @@ export function calculateAvailabilityMatch(resource: ResourceDocument, request: 
   return clamp01(overlap / requestDuration);
 }
 
-export function calculateMatchScore(resource: ResourceDocument, request: RequestDocument): MatchScoreBreakdown & { score: number } {
+export function calculateMatchScore(
+  resource: ResourceDocument,
+  request: RequestDocument,
+): MatchScoreBreakdown & { score: number } {
   const availabilityMatch = calculateAvailabilityMatch(resource, request);
   if (availabilityMatch === 0) {
     return {
@@ -163,10 +182,7 @@ export function calculateMatchScore(resource: ResourceDocument, request: Request
 
   // Weighted composite score: time alignment carries the most weight, followed by location, price, and priority.
   const weightedScore =
-    0.4 * timeMatch +
-    0.3 * locationMatch +
-    0.2 * priceMatch +
-    0.1 * priorityMatch;
+    0.4 * timeMatch + 0.3 * locationMatch + 0.2 * priceMatch + 0.1 * priorityMatch;
 
   return {
     timeMatch,
@@ -238,7 +254,9 @@ export async function findBestMatchForRequest(
   resources?: ResourceDocument[],
 ): Promise<MatchResult | null> {
   const resourcePool = resources ?? (await resourceRepository.findAvailable());
-  const compatibleResources = resourcePool.filter((resource) => resource.type === request.resourceType);
+  const compatibleResources = resourcePool.filter(
+    (resource) => resource.type === request.resourceType,
+  );
 
   const scored = compatibleResources.map((resource) => toMatchResult(resource, request));
   const ranked = rankMatches(scored);
@@ -248,7 +266,16 @@ export async function findBestMatchForRequest(
     return null;
   }
 
-  const { resource, request: matchedRequest, timeMatch, locationMatch, priceMatch, priorityMatch, availabilityMatch, ...result } = best;
+  const {
+    resource,
+    request: matchedRequest,
+    timeMatch,
+    locationMatch,
+    priceMatch,
+    priorityMatch,
+    availabilityMatch,
+    ...result
+  } = best;
   void resource;
   void matchedRequest;
   void timeMatch;
@@ -267,12 +294,15 @@ export async function findBestMatches(): Promise<MatchResult[]> {
   ]);
 
   const usedResourceIds = new Set<string>();
-  const prioritizedRequests = [...pendingRequests].sort((left, right) => right.priority - left.priority);
+  const prioritizedRequests = [...pendingRequests].sort(
+    (left, right) => right.priority - left.priority,
+  );
   const matches: MatchResult[] = [];
 
   for (const request of prioritizedRequests) {
     const availableCompatibleResources = resources.filter(
-      (resource) => resource.type === request.resourceType && !usedResourceIds.has(resource._id.toHexString()),
+      (resource) =>
+        resource.type === request.resourceType && !usedResourceIds.has(resource._id.toHexString()),
     );
 
     const bestMatch = await findBestMatchForRequest(request, availableCompatibleResources);

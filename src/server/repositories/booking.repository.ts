@@ -52,10 +52,16 @@ export async function update(input: unknown): Promise<BookingDocument | null> {
 
 export async function findActive(): Promise<BookingDocument[]> {
   const collection = await getBookingCollection();
-  return collection.find({ status: "active" satisfies BookingStatus }).sort({ timestamp: -1 }).toArray();
+  return collection
+    .find({ status: "active" satisfies BookingStatus })
+    .sort({ timestamp: -1 })
+    .toArray();
 }
 
 export async function findCompleted(): Promise<BookingDocument[]> {
   const collection = await getBookingCollection();
-  return collection.find({ status: "completed" satisfies BookingStatus }).sort({ timestamp: -1 }).toArray();
+  return collection
+    .find({ status: "completed" satisfies BookingStatus })
+    .sort({ timestamp: -1 })
+    .toArray();
 }

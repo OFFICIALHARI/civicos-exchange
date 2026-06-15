@@ -4,7 +4,10 @@ import { z } from "zod";
 const objectIdSchema = z
   .union([
     z.instanceof(ObjectId),
-    z.string().trim().regex(/^[a-fA-F0-9]{24}$/, "Expected a MongoDB ObjectId string"),
+    z
+      .string()
+      .trim()
+      .regex(/^[a-fA-F0-9]{24}$/, "Expected a MongoDB ObjectId string"),
   ])
   .transform((value) => (typeof value === "string" ? new ObjectId(value) : value));
 
@@ -15,7 +18,7 @@ export const InsightForecastPointSchema = z.object({
   value: z.number(),
 });
 
-export interface InsightForecastPoint extends z.infer<typeof InsightForecastPointSchema> {}
+export type InsightForecastPoint = z.infer<typeof InsightForecastPointSchema>;
 
 export const InsightSchema = z.object({
   _id: objectIdSchema,
@@ -28,7 +31,7 @@ export const InsightSchema = z.object({
 });
 
 export type InsightDocument = z.infer<typeof InsightSchema>;
-export interface Insight extends InsightDocument {}
+export type Insight = InsightDocument;
 
 export const InsightCreateInputSchema = InsightSchema.omit({
   _id: true,

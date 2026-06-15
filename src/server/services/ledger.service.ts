@@ -50,7 +50,11 @@ function success<T>(value: T): LedgerServiceResult<T> {
   return { ok: true, value };
 }
 
-function failure(code: LedgerServiceErrorCode, message: string, details?: Record<string, string>): LedgerServiceResult<never> {
+function failure(
+  code: LedgerServiceErrorCode,
+  message: string,
+  details?: Record<string, string>,
+): LedgerServiceResult<never> {
   return { ok: false, error: { code, message, details } };
 }
 
@@ -73,7 +77,9 @@ function resolveBookingId(input: BookingReference): LedgerServiceResult<ObjectId
 
   if (typeof input === "string") {
     if (!isValidObjectId(input)) {
-      return failure("INVALID_BOOKING_ID", "Booking id must be a valid MongoDB ObjectId.", { bookingId: input });
+      return failure("INVALID_BOOKING_ID", "Booking id must be a valid MongoDB ObjectId.", {
+        bookingId: input,
+      });
     }
 
     return success(input);
@@ -88,7 +94,9 @@ function resolveBookingId(input: BookingReference): LedgerServiceResult<ObjectId
   return success(input._id);
 }
 
-async function loadBooking(reference: BookingReference): Promise<LedgerServiceResult<BookingDocument>> {
+async function loadBooking(
+  reference: BookingReference,
+): Promise<LedgerServiceResult<BookingDocument>> {
   const bookingIdResult = resolveBookingId(reference);
   if (!bookingIdResult.ok) {
     return bookingIdResult;
@@ -97,16 +105,23 @@ async function loadBooking(reference: BookingReference): Promise<LedgerServiceRe
   try {
     const booking = await bookingRepository.findById(bookingIdResult.value);
     if (!booking) {
-      return failure("BOOKING_NOT_FOUND", "Booking was not found.", { bookingId: toObjectIdString(bookingIdResult.value) });
+      return failure("BOOKING_NOT_FOUND", "Booking was not found.", {
+        bookingId: toObjectIdString(bookingIdResult.value),
+      });
     }
 
     return success(booking);
   } catch (error) {
-    return failure("REPOSITORY_ERROR", error instanceof Error ? error.message : "Failed to load booking.");
+    return failure(
+      "REPOSITORY_ERROR",
+      error instanceof Error ? error.message : "Failed to load booking.",
+    );
   }
 }
 
-async function loadRequiredReferences(booking: BookingDocument): Promise<LedgerServiceResult<{ booking: BookingDocument }>> {
+async function loadRequiredReferences(
+  booking: BookingDocument,
+): Promise<LedgerServiceResult<{ booking: BookingDocument }>> {
   try {
     const [request, resource] = await Promise.all([
       requestRepository.findById(booking.requestId),
@@ -114,31 +129,47 @@ async function loadRequiredReferences(booking: BookingDocument): Promise<LedgerS
     ]);
 
     if (!request) {
-      return failure("MISSING_REFERENCE", "Ledger entry cannot be created because the request is missing.", {
-        requestId: booking.requestId.toHexString(),
-      });
+      return failure(
+        "MISSING_REFERENCE",
+        "Ledger entry cannot be created because the request is missing.",
+        {
+          requestId: booking.requestId.toHexString(),
+        },
+      );
     }
 
     if (!resource) {
-      return failure("MISSING_REFERENCE", "Ledger entry cannot be created because the resource is missing.", {
-        resourceId: booking.resourceId.toHexString(),
-      });
+      return failure(
+        "MISSING_REFERENCE",
+        "Ledger entry cannot be created because the resource is missing.",
+        {
+          resourceId: booking.resourceId.toHexString(),
+        },
+      );
     }
 
     return success({ booking });
   } catch (error) {
-    return failure("REPOSITORY_ERROR", error instanceof Error ? error.message : "Failed to load booking references.");
+    return failure(
+      "REPOSITORY_ERROR",
+      error instanceof Error ? error.message : "Failed to load booking references.",
+    );
   }
 }
 
-function normalizeLedgerEntry(entry: LedgerEntryDocument, bookingStatus: LedgerStatus): LedgerEntryRecord {
+function normalizeLedgerEntry(
+  entry: LedgerEntryDocument,
+  bookingStatus: LedgerStatus,
+): LedgerEntryRecord {
   return {
     ...entry,
     status: bookingStatus,
   };
 }
 
-async function enrichLedgerEntries(entries: Array<LedgerEntryDocument & { status?: string }>): Promise<LedgerServiceResult<LedgerEntryRecord[]>> {
+async function enrichLedgerEntries(
+  entries: Array<LedgerEntryDocument & { status?: string }>,
+): Promise<LedgerServiceResult<LedgerEntryRecord[]>> {
   const enriched: LedgerEntryRecord[] = [];
 
   for (const entry of entries) {
@@ -152,19 +183,28 @@ async function enrichLedgerEntries(entries: Array<LedgerEntryDocument & { status
 
       enriched.push(normalizeLedgerEntry(entry, booking.status));
     } catch (error) {
-      return failure("REPOSITORY_ERROR", error instanceof Error ? error.message : "Failed to enrich ledger entry.");
+      return failure(
+        "REPOSITORY_ERROR",
+        error instanceof Error ? error.message : "Failed to enrich ledger entry.",
+      );
     }
   }
 
   return success(enriched);
 }
 
-async function createLedgerRecord(booking: BookingDocument): Promise<LedgerServiceResult<LedgerEntryRecord>> {
+async function createLedgerRecord(
+  booking: BookingDocument,
+): Promise<LedgerServiceResult<LedgerEntryRecord>> {
   if (booking.status !== "completed") {
-    return failure("BOOKING_NOT_COMPLETED", "Only completed bookings can be written to the ledger.", {
-      bookingId: booking._id.toHexString(),
-      bookingStatus: booking.status,
-    });
+    return failure(
+      "BOOKING_NOT_COMPLETED",
+      "Only completed bookings can be written to the ledger.",
+      {
+        bookingId: booking._id.toHexString(),
+        bookingStatus: booking.status,
+      },
+    );
   }
 
   const referenceCheck = await loadRequiredReferences(booking);
@@ -173,12 +213,17 @@ async function createLedgerRecord(booking: BookingDocument): Promise<LedgerServi
   }
 
   try {
-    const existingEntries = (await ledgerRepository.findByBooking(booking._id)) as Array<LedgerEntryDocument & { status?: string }>;
+    const existingEntries = (await ledgerRepository.findByBooking(booking._id)) as Array<
+      LedgerEntryDocument & { status?: string }
+    >;
     if (existingEntries.length > 0) {
       return success(normalizeLedgerEntry(existingEntries[0], booking.status));
     }
   } catch (error) {
-    return failure("REPOSITORY_ERROR", error instanceof Error ? error.message : "Failed to inspect existing ledger entries.");
+    return failure(
+      "REPOSITORY_ERROR",
+      error instanceof Error ? error.message : "Failed to inspect existing ledger entries.",
+    );
   }
 
   const ledgerEntry: LedgerEntryRecord = {
@@ -196,11 +241,16 @@ async function createLedgerRecord(booking: BookingDocument): Promise<LedgerServi
     await ledgerRepository.create(ledgerEntry);
     return success(ledgerEntry);
   } catch (error) {
-    return failure("REPOSITORY_ERROR", error instanceof Error ? error.message : "Failed to create ledger entry.");
+    return failure(
+      "REPOSITORY_ERROR",
+      error instanceof Error ? error.message : "Failed to create ledger entry.",
+    );
   }
 }
 
-export async function createLedgerEntry(booking: BookingReference): Promise<LedgerServiceResult<LedgerEntryRecord>> {
+export async function createLedgerEntry(
+  booking: BookingReference,
+): Promise<LedgerServiceResult<LedgerEntryRecord>> {
   const loadedBooking = await loadBooking(booking);
   if (!loadedBooking.ok) {
     return loadedBooking;
@@ -229,14 +279,21 @@ export async function createLedgerEntriesFromBookings(
 
 export async function getLedgerHistory(): Promise<LedgerServiceResult<LedgerEntryRecord[]>> {
   try {
-    const entries = (await ledgerRepository.findAll()) as Array<LedgerEntryDocument & { status?: string }>;
+    const entries = (await ledgerRepository.findAll()) as Array<
+      LedgerEntryDocument & { status?: string }
+    >;
     return enrichLedgerEntries(entries);
   } catch (error) {
-    return failure("REPOSITORY_ERROR", error instanceof Error ? error.message : "Failed to load ledger history.");
+    return failure(
+      "REPOSITORY_ERROR",
+      error instanceof Error ? error.message : "Failed to load ledger history.",
+    );
   }
 }
 
-export async function getLedgerByBooking(bookingId: ObjectIdReference): Promise<LedgerServiceResult<LedgerEntryRecord[]>> {
+export async function getLedgerByBooking(
+  bookingId: ObjectIdReference,
+): Promise<LedgerServiceResult<LedgerEntryRecord[]>> {
   if (!isValidObjectId(bookingId)) {
     return failure("INVALID_BOOKING_ID", "Booking id must be a valid MongoDB ObjectId.", {
       bookingId: toObjectIdString(bookingId),
@@ -244,14 +301,21 @@ export async function getLedgerByBooking(bookingId: ObjectIdReference): Promise<
   }
 
   try {
-    const entries = (await ledgerRepository.findByBooking(bookingId)) as Array<LedgerEntryDocument & { status?: string }>;
+    const entries = (await ledgerRepository.findByBooking(bookingId)) as Array<
+      LedgerEntryDocument & { status?: string }
+    >;
     return enrichLedgerEntries(entries);
   } catch (error) {
-    return failure("REPOSITORY_ERROR", error instanceof Error ? error.message : "Failed to load ledger entries by booking.");
+    return failure(
+      "REPOSITORY_ERROR",
+      error instanceof Error ? error.message : "Failed to load ledger entries by booking.",
+    );
   }
 }
 
-export async function getLedgerByResource(resourceId: ObjectIdReference): Promise<LedgerServiceResult<LedgerEntryRecord[]>> {
+export async function getLedgerByResource(
+  resourceId: ObjectIdReference,
+): Promise<LedgerServiceResult<LedgerEntryRecord[]>> {
   if (!isValidObjectId(resourceId)) {
     return failure("INVALID_RESOURCE_ID", "Resource id must be a valid MongoDB ObjectId.", {
       resourceId: toObjectIdString(resourceId),
@@ -259,9 +323,14 @@ export async function getLedgerByResource(resourceId: ObjectIdReference): Promis
   }
 
   try {
-    const entries = (await ledgerRepository.findByResource(resourceId)) as Array<LedgerEntryDocument & { status?: string }>;
+    const entries = (await ledgerRepository.findByResource(resourceId)) as Array<
+      LedgerEntryDocument & { status?: string }
+    >;
     return enrichLedgerEntries(entries);
   } catch (error) {
-    return failure("REPOSITORY_ERROR", error instanceof Error ? error.message : "Failed to load ledger entries by resource.");
+    return failure(
+      "REPOSITORY_ERROR",
+      error instanceof Error ? error.message : "Failed to load ledger entries by resource.",
+    );
   }
 }

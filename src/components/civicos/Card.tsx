@@ -1,12 +1,20 @@
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
-export function Card({ className, children, glow }: { className?: string; children: ReactNode; glow?: boolean }) {
+export function Card({
+  className,
+  children,
+  glow,
+}: {
+  className?: string;
+  children: ReactNode;
+  glow?: boolean;
+}) {
   return (
     <div
       className={cn(
-        "rounded-xl border border-border bg-card/70 backdrop-blur-sm shadow-[0_1px_0_0_rgba(255,255,255,0.03)_inset]",
-        glow && "neon-glow",
+        "rounded-2xl border border-border bg-card/30 backdrop-blur-md shadow-sm transition-all duration-300 hover:bg-card/40 hover:border-border/80",
+        glow && "forest-glow",
         className,
       )}
     >
@@ -15,12 +23,27 @@ export function Card({ className, children, glow }: { className?: string; childr
   );
 }
 
-export function CardHeader({ title, subtitle, action, className }: { title?: ReactNode; subtitle?: ReactNode; action?: ReactNode; className?: string }) {
+export function CardHeader({
+  title,
+  subtitle,
+  action,
+  className,
+}: {
+  title?: ReactNode;
+  subtitle?: ReactNode;
+  action?: ReactNode;
+  className?: string;
+}) {
   return (
-    <div className={cn("flex items-start justify-between gap-3 border-b border-border/60 px-4 py-3", className)}>
+    <div
+      className={cn(
+        "flex items-start justify-between gap-4 border-b border-border/40 px-6 py-4",
+        className,
+      )}
+    >
       <div className="min-w-0">
-        {title && <div className="truncate text-sm font-medium text-foreground">{title}</div>}
-        {subtitle && <div className="mt-0.5 text-xs text-muted-foreground">{subtitle}</div>}
+        {title && <div className="truncate text-sm font-semibold text-foreground/90 tracking-tight">{title}</div>}
+        {subtitle && <div className="mt-1 text-xs text-muted-foreground/60 font-medium">{subtitle}</div>}
       </div>
       {action && <div className="shrink-0">{action}</div>}
     </div>
@@ -28,5 +51,5 @@ export function CardHeader({ title, subtitle, action, className }: { title?: Rea
 }
 
 export function CardBody({ className, children }: { className?: string; children: ReactNode }) {
-  return <div className={cn("p-4", className)}>{children}</div>;
+  return <div className={cn("p-6", className)}>{children}</div>;
 }

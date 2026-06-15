@@ -4,7 +4,12 @@ import { LedgerTable } from "@/components/civicos/LedgerTable";
 import { useLedger } from "@/lib/civicos/hooks";
 
 export const Route = createFileRoute("/ledger")({
-  head: () => ({ meta: [{ title: "Ledger · CivicOS" }, { name: "description", content: "Settled transactions across the resource exchange." }] }),
+  head: () => ({
+    meta: [
+      { title: "Ledger · CivicOS" },
+      { name: "description", content: "Settled transactions across the resource exchange." },
+    ],
+  }),
   component: Ledger,
 });
 

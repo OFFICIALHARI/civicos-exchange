@@ -30,9 +30,14 @@ export function ErrorState({ onRetry }: { onRetry?: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-6 py-10 text-center">
       <div className="text-sm font-medium text-destructive">Failed to load</div>
-      <div className="max-w-sm text-xs text-muted-foreground">The data layer is unreachable. Retry, or check the upstream service.</div>
+      <div className="max-w-sm text-xs text-muted-foreground">
+        The data layer is unreachable. Retry, or check the upstream service.
+      </div>
       {onRetry && (
-        <button onClick={onRetry} className="rounded-md border border-border bg-card px-3 py-1.5 text-xs hover:bg-elevated">
+        <button
+          onClick={onRetry}
+          className="rounded-md border border-border bg-card px-3 py-1.5 text-xs hover:bg-elevated"
+        >
           Retry
         </button>
       )}

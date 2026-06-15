@@ -38,7 +38,10 @@ export async function findAll(): Promise<RequestDocument[]> {
 
 export async function findPending(): Promise<RequestDocument[]> {
   const collection = await getRequestCollection();
-  return collection.find({ status: "pending" satisfies RequestStatus }).sort({ createdAt: -1 }).toArray();
+  return collection
+    .find({ status: "pending" satisfies RequestStatus })
+    .sort({ createdAt: -1 })
+    .toArray();
 }
 
 export async function update(input: unknown): Promise<RequestDocument | null> {
@@ -66,5 +69,8 @@ export async function deleteRequest(id: ObjectIdLike): Promise<boolean> {
 
 export async function findByUser(userId: ObjectIdLike): Promise<RequestDocument[]> {
   const collection = await getRequestCollection();
-  return collection.find({ userId: toObjectId(userId, "User id") }).sort({ createdAt: -1 }).toArray();
+  return collection
+    .find({ userId: toObjectId(userId, "User id") })
+    .sort({ createdAt: -1 })
+    .toArray();
 }

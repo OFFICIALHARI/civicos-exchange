@@ -2,6 +2,8 @@ import type { AnalyticsSummary } from "@/server/services/analytics.service";
 import type { HistoricalMetricDocument } from "@/server/models/historical-metric";
 import * as analyticsService from "@/server/services/analytics.service";
 import * as historicalMetricService from "@/server/services/historical-metric.service";
+import * as ledgerRepository from "@/server/repositories/ledger.repository";
+import { generateGeminiInsights } from "./gemini-insights.service";
 
 export type InsightCategory = "opportunity" | "risk" | "forecast" | "recommendation";
 export type InsightSeverity = "low" | "medium" | "high" | "critical";
@@ -31,7 +33,9 @@ function calculateConfidence(history: HistoricalMetricDocument[]): number {
   return 85; // High sample size
 }
 
-export async function generateOpportunityInsights(summary: AnalyticsSummary): Promise<CivicInsight[]> {
+export async function generateOpportunityInsights(
+  summary: AnalyticsSummary,
+): Promise<CivicInsight[]> {
   const insights: CivicInsight[] = [];
   const { demandPressure, resourceBreakdown } = summary;
 
@@ -45,7 +49,10 @@ export async function generateOpportunityInsights(summary: AnalyticsSummary): Pr
       recommendation: "Encourage community members to list more underutilized resources.",
       confidenceScore: 90,
       generatedAt: new Date(),
-      bullets: ["Demand exceeds supply significantly", "Marketplace expansion potential identified"],
+      bullets: [
+        "Demand exceeds supply significantly",
+        "Marketplace expansion potential identified",
+      ],
     });
   }
 
@@ -80,7 +87,11 @@ export async function generateRiskInsights(summary: AnalyticsSummary): Promise<C
       recommendation: "Immediate intervention required to balance supply and demand.",
       confidenceScore: 95,
       generatedAt: new Date(),
-      bullets: ["High utilization (>85%)", "Extreme demand pressure", "Match quality monitoring required"],
+      bullets: [
+        "High utilization (>85%)",
+        "Extreme demand pressure",
+        "Match quality monitoring required",
+      ],
     });
   } else if (marketplaceHealth.utilization > 0.75) {
     insights.push({
@@ -111,7 +122,9 @@ export async function generateRiskInsights(summary: AnalyticsSummary): Promise<C
   return insights;
 }
 
-export async function generateForecastInsights(history: HistoricalMetricDocument[]): Promise<CivicInsight[]> {
+export async function generateForecastInsights(
+  history: HistoricalMetricDocument[],
+): Promise<CivicInsight[]> {
   const insights: CivicInsight[] = [];
   if (history.length < 3) return insights;
 
@@ -125,7 +138,8 @@ export async function generateForecastInsights(history: HistoricalMetricDocument
       category: "forecast",
       severity: "low",
       title: "Rising Utilization Trend",
-      description: "Utilization has shown a consistent upward trend over the last recorded periods.",
+      description:
+        "Utilization has shown a consistent upward trend over the last recorded periods.",
       recommendation: "Pre-emptively secure additional resources for peak periods.",
       confidenceScore: confidence,
       generatedAt: new Date(),
@@ -148,7 +162,9 @@ export async function generateForecastInsights(history: HistoricalMetricDocument
   return insights;
 }
 
-export async function generateRecommendationInsights(summary: AnalyticsSummary): Promise<CivicInsight[]> {
+export async function generateRecommendationInsights(
+  summary: AnalyticsSummary,
+): Promise<CivicInsight[]> {
   const insights: CivicInsight[] = [];
   const { resourceBreakdown, marketplaceHealth } = summary;
 
@@ -182,10 +198,59 @@ export async function generateRecommendationInsights(summary: AnalyticsSummary):
 }
 
 export async function generateMarketplaceInsights(): Promise<CivicInsight[]> {
-  const [summary, history] = await Promise.all([
+  const [summary, history, ledger] = await Promise.all([
     analyticsService.getAnalyticsSummary(),
     historicalMetricService.getHistoricalSnapshots(10),
+    ledgerRepository.findAll()
   ]);
+
+  const geminiResult = await generateGeminiInsights(summary, history, ledger);
+
+  if (geminiResult) {
+    const aiInsights: CivicInsight[] = [];
+    const ts = Date.now();
+    let counter = 0;
+
+    const mapResponseToInsight = (items: any[], category: InsightCategory) => {
+      items.forEach((item) => {
+        counter++;
+        aiInsights.push({
+          id: `gemini-${category}-${ts}-${counter}`,
+          category,
+          severity: item.severity || "medium",
+          title: item.title || "AI Insight",
+          description: item.description || "",
+          recommendation: item.recommendation || "",
+          confidenceScore: item.confidenceScore || 85,
+          generatedAt: new Date(),
+          bullets: item.bullets || [],
+        });
+      });
+    };
+
+    mapResponseToInsight(geminiResult.opportunities || [], "opportunity");
+    mapResponseToInsight(geminiResult.risks || [], "risk");
+    mapResponseToInsight(geminiResult.forecasts || [], "forecast");
+    mapResponseToInsight(geminiResult.recommendations || [], "recommendation");
+
+    if (geminiResult.summary) {
+      aiInsights.unshift({
+        id: `gemini-summary-${ts}`,
+        category: "recommendation",
+        severity: "low",
+        title: "Marketplace Analysis Complete",
+        description: geminiResult.summary,
+        recommendation: "Review the insights below to optimize community resources.",
+        confidenceScore: 99,
+        generatedAt: new Date(),
+      });
+    }
+
+    return aiInsights.sort((a, b) => {
+      const severityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+      return severityOrder[a.severity] - severityOrder[b.severity];
+    });
+  }
 
   const all = await Promise.all([
     generateOpportunityInsights(summary),

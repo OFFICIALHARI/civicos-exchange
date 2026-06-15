@@ -4,8 +4,12 @@ import type { TimeRange } from "@/lib/civicos/types";
 const RANGES: TimeRange[] = ["1h", "8h", "1d", "1w", "1m", "6m", "1y"];
 
 export function TimeRangeTabs({
-  value, onChange,
-}: { value: TimeRange; onChange: (r: TimeRange) => void }) {
+  value,
+  onChange,
+}: {
+  value: TimeRange;
+  onChange: (r: TimeRange) => void;
+}) {
   return (
     <div className="inline-flex items-center gap-1 rounded-lg border border-border bg-surface/60 p-1">
       {RANGES.map((r) => (

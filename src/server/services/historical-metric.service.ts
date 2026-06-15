@@ -11,25 +11,25 @@ export async function recordMarketplaceSnapshot(): Promise<HistoricalMetricDocum
   const snapshot: HistoricalMetricDocument = {
     _id: new ObjectId(),
     timestamp: new Date(),
-    
+
     // Resource metrics
     totalResources: dashboard.totalResources,
     availableResources: dashboard.availableResources,
     reservedResources: dashboard.reservedResources,
     bookedResources: dashboard.bookedResources,
-    
+
     // Request metrics
     totalRequests: dashboard.totalRequests,
     pendingRequests: dashboard.pendingRequests,
     matchedRequests: dashboard.matchedRequests,
     completedRequests: dashboard.completedRequests,
-    
+
     // Booking & Ledger metrics
     totalBookings: dashboard.totalBookings,
     activeBookings: dashboard.activeBookings,
     completedBookings: dashboard.completedBookings,
     totalLedgerEntries: dashboard.totalLedgerEntries,
-    
+
     // Composite & Ratio metrics
     utilizationPercentage: summary.resourceUtilization.utilizationPercentage,
     demandPressure: summary.demandPressure.demandPressure,
@@ -51,10 +51,10 @@ export interface TrendPoint {
 
 export async function getMetricTrend(
   metricName: keyof Omit<HistoricalMetricDocument, "_id" | "timestamp">,
-  limit = 30
+  limit = 30,
 ): Promise<TrendPoint[]> {
   const snapshots = await getHistoricalSnapshots(limit);
-  
+
   return snapshots.map((snapshot) => ({
     t: snapshot.timestamp.toISOString(),
     value: snapshot[metricName] as unknown as number,
@@ -64,20 +64,20 @@ export async function getMetricTrend(
 // Specialized trend getters
 export async function getUtilizationTrend(limit = 30): Promise<TrendPoint[]> {
   const snapshots = await getHistoricalSnapshots(limit);
-  return snapshots.map(s => ({ t: s.timestamp.toISOString(), value: s.utilizationPercentage }));
+  return snapshots.map((s) => ({ t: s.timestamp.toISOString(), value: s.utilizationPercentage }));
 }
 
 export async function getDemandPressureTrend(limit = 30): Promise<TrendPoint[]> {
   const snapshots = await getHistoricalSnapshots(limit);
-  return snapshots.map(s => ({ t: s.timestamp.toISOString(), value: s.demandPressure }));
+  return snapshots.map((s) => ({ t: s.timestamp.toISOString(), value: s.demandPressure }));
 }
 
 export async function getBookingTrend(limit = 30): Promise<TrendPoint[]> {
   const snapshots = await getHistoricalSnapshots(limit);
-  return snapshots.map(s => ({ t: s.timestamp.toISOString(), value: s.totalBookings }));
+  return snapshots.map((s) => ({ t: s.timestamp.toISOString(), value: s.totalBookings }));
 }
 
 export async function getMatchScoreTrend(limit = 30): Promise<TrendPoint[]> {
   const snapshots = await getHistoricalSnapshots(limit);
-  return snapshots.map(s => ({ t: s.timestamp.toISOString(), value: s.averageMatchScore }));
+  return snapshots.map((s) => ({ t: s.timestamp.toISOString(), value: s.averageMatchScore }));
 }

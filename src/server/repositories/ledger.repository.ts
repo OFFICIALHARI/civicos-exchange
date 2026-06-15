@@ -27,10 +27,16 @@ export async function findAll(): Promise<LedgerEntryDocument[]> {
 
 export async function findByBooking(bookingId: ObjectIdLike): Promise<LedgerEntryDocument[]> {
   const collection = await getLedgerCollection();
-  return collection.find({ bookingId: toObjectId(bookingId, "Booking id") }).sort({ timestamp: -1 }).toArray();
+  return collection
+    .find({ bookingId: toObjectId(bookingId, "Booking id") })
+    .sort({ timestamp: -1 })
+    .toArray();
 }
 
 export async function findByResource(resourceId: ObjectIdLike): Promise<LedgerEntryDocument[]> {
   const collection = await getLedgerCollection();
-  return collection.find({ resourceId: toObjectId(resourceId, "Resource id") }).sort({ timestamp: -1 }).toArray();
+  return collection
+    .find({ resourceId: toObjectId(resourceId, "Resource id") })
+    .sort({ timestamp: -1 })
+    .toArray();
 }

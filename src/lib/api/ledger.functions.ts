@@ -52,8 +52,8 @@ function handleServiceResult<T, R>(result: LedgerServiceResult<T>, mapper: (val:
   throw new Error(`${result.error.code}: ${result.error.message}`);
 }
 
-export const getLedgerHistory = createServerFn({ method: "POST" })
-  .handler(async (): Promise<LedgerEntryResponse[]> => {
+export const getLedgerHistory = createServerFn({ method: "POST" }).handler(
+  async (): Promise<LedgerEntryResponse[]> => {
     try {
       const { getLedgerHistory: serviceFn } = await loadLedgerService();
       const result = await serviceFn();
@@ -61,7 +61,8 @@ export const getLedgerHistory = createServerFn({ method: "POST" })
     } catch (error) {
       wrapError("fetch ledger history", error);
     }
-  });
+  },
+);
 
 export const getLedgerByBooking = createServerFn({ method: "POST" })
   .inputValidator(z.object({ bookingId: objectIdSchema }))

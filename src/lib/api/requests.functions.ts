@@ -67,15 +67,16 @@ export const createRequest = createServerFn({ method: "POST" })
     }
   });
 
-export const getRequests = createServerFn({ method: "POST" })
-  .handler(async (): Promise<RequestResponse[]> => {
+export const getRequests = createServerFn({ method: "POST" }).handler(
+  async (): Promise<RequestResponse[]> => {
     try {
       const { findAll } = await loadRequestRepository();
       return (await findAll()).map(serializeRequest);
     } catch (error) {
       wrapError("fetch requests", error);
     }
-  });
+  },
+);
 
 export const getRequestById = createServerFn({ method: "POST" })
   .inputValidator(z.object({ id: requestIdSchema }))
@@ -112,15 +113,16 @@ export const deleteRequest = createServerFn({ method: "POST" })
     }
   });
 
-export const getPendingRequests = createServerFn({ method: "POST" })
-  .handler(async (): Promise<RequestResponse[]> => {
+export const getPendingRequests = createServerFn({ method: "POST" }).handler(
+  async (): Promise<RequestResponse[]> => {
     try {
       const { findPending } = await loadRequestRepository();
       return (await findPending()).map(serializeRequest);
     } catch (error) {
       wrapError("fetch pending requests", error);
     }
-  });
+  },
+);
 
 export const getRequestsByUser = createServerFn({ method: "POST" })
   .inputValidator(z.object({ userId: requestIdSchema }))

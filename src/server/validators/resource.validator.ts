@@ -15,14 +15,19 @@ export const ResourceCreateSchema = ResourceCreateInputSchema.extend({
   description: z.string().trim().min(1, "Description is required."),
   location: z.string().trim().min(1, "Location is required."),
   availability: ResourceAvailabilitySchema,
-  quantity: z.number({
-    required_error: "Quantity is required.",
-    invalid_type_error: "Quantity must be a number.",
-  }).int("Quantity must be a whole number.").nonnegative("Quantity cannot be negative."),
-  price: z.number({
-    required_error: "Price is required.",
-    invalid_type_error: "Price must be a number.",
-  }).nonnegative("Price cannot be negative."),
+  quantity: z
+    .number({
+      required_error: "Quantity is required.",
+      invalid_type_error: "Quantity must be a number.",
+    })
+    .int("Quantity must be a whole number.")
+    .nonnegative("Quantity cannot be negative."),
+  price: z
+    .number({
+      required_error: "Price is required.",
+      invalid_type_error: "Price must be a number.",
+    })
+    .nonnegative("Price cannot be negative."),
   status: ResourceStatusSchema,
 });
 
@@ -38,14 +43,19 @@ export const ResourceUpdateSchema = ResourceSchema.omit({
   description: z.string().trim().min(1, "Description is required."),
   location: z.string().trim().min(1, "Location is required."),
   availability: ResourceAvailabilitySchema,
-  quantity: z.number({
-    required_error: "Quantity is required.",
-    invalid_type_error: "Quantity must be a number.",
-  }).int("Quantity must be a whole number.").nonnegative("Quantity cannot be negative."),
-  price: z.number({
-    required_error: "Price is required.",
-    invalid_type_error: "Price must be a number.",
-  }).nonnegative("Price cannot be negative."),
+  quantity: z
+    .number({
+      required_error: "Quantity is required.",
+      invalid_type_error: "Quantity must be a number.",
+    })
+    .int("Quantity must be a whole number.")
+    .nonnegative("Quantity cannot be negative."),
+  price: z
+    .number({
+      required_error: "Price is required.",
+      invalid_type_error: "Price must be a number.",
+    })
+    .nonnegative("Price cannot be negative."),
   status: ResourceStatusSchema,
 });
 
@@ -57,12 +67,19 @@ export const ResourcePatchSchema = ResourceUpdateInputSchema.extend({
   description: z.string().trim().min(1, "Description is required.").optional(),
   location: z.string().trim().min(1, "Location is required.").optional(),
   availability: ResourceAvailabilitySchema.optional(),
-  quantity: z.number({
-    invalid_type_error: "Quantity must be a number.",
-  }).int("Quantity must be a whole number.").nonnegative("Quantity cannot be negative.").optional(),
-  price: z.number({
-    invalid_type_error: "Price must be a number.",
-  }).nonnegative("Price cannot be negative.").optional(),
+  quantity: z
+    .number({
+      invalid_type_error: "Quantity must be a number.",
+    })
+    .int("Quantity must be a whole number.")
+    .nonnegative("Quantity cannot be negative.")
+    .optional(),
+  price: z
+    .number({
+      invalid_type_error: "Price must be a number.",
+    })
+    .nonnegative("Price cannot be negative.")
+    .optional(),
   status: ResourceStatusSchema.optional(),
 });
 

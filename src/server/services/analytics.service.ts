@@ -107,13 +107,15 @@ async function loadAnalyticsSources(): Promise<{
 
 async function getLedgerAggregations(): Promise<{ revenue: number; savings: number }> {
   const entries = await ledgerRepository.findAll();
-  return entries.reduce(
+  const results = entries.reduce(
     (acc, entry) => ({
       revenue: acc.revenue + entry.matchedPrice,
       savings: acc.savings + entry.matchedPrice * 0.4, // Simplified 40% efficiency savings logic
     }),
-    { revenue: 0, savings: 0 }
+    { revenue: 0, savings: 0 },
   );
+
+  return results;
 }
 
 export async function getDashboardMetrics(): Promise<DashboardMetrics> {
@@ -134,7 +136,7 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
   const activeBookings = countByStatus(bookings, "active");
   const completedBookings = countByStatus(bookings, "completed");
 
-  return {
+  const metrics = {
     totalResources,
     availableResources,
     reservedResources,
@@ -151,6 +153,8 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
     totalRevenue: revenue,
     totalCommunitySavings: savings,
   };
+
+  return metrics;
 }
 
 export async function getResourceUtilization(): Promise<ResourceUtilization> {
@@ -189,7 +193,11 @@ export async function getResourceBreakdown(): Promise<ResourceBreakdown> {
   };
 }
 
-function deriveMarketplaceStatus(utilization: number, demandPressure: number, averageMatchScore: number): MarketplaceHealthStatus {
+function deriveMarketplaceStatus(
+  utilization: number,
+  demandPressure: number,
+  averageMatchScore: number,
+): MarketplaceHealthStatus {
   if (utilization >= 0.85 || demandPressure >= 3 || averageMatchScore < 0.4) {
     return "critical";
   }
@@ -221,7 +229,13 @@ export async function getMarketplaceHealth(): Promise<MarketplaceHealth> {
 }
 
 export async function getAnalyticsSummary(): Promise<AnalyticsSummary> {
-  const [dashboardMetrics, resourceUtilization, demandPressure, resourceBreakdown, marketplaceHealth] = await Promise.all([
+  const [
+    dashboardMetrics,
+    resourceUtilization,
+    demandPressure,
+    resourceBreakdown,
+    marketplaceHealth,
+  ] = await Promise.all([
     getDashboardMetrics(),
     getResourceUtilization(),
     getDemandPressure(),

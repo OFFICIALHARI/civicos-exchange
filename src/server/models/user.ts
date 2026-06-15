@@ -4,7 +4,10 @@ import { z } from "zod";
 const objectIdSchema = z
   .union([
     z.instanceof(ObjectId),
-    z.string().trim().regex(/^[a-fA-F0-9]{24}$/, "Expected a MongoDB ObjectId string"),
+    z
+      .string()
+      .trim()
+      .regex(/^[a-fA-F0-9]{24}$/, "Expected a MongoDB ObjectId string"),
   ])
   .transform((value) => (typeof value === "string" ? new ObjectId(value) : value));
 
@@ -22,7 +25,7 @@ export const UserSchema = z.object({
 });
 
 export type UserDocument = z.infer<typeof UserSchema>;
-export interface User extends UserDocument {}
+export type User = UserDocument;
 
 export const UserCreateInputSchema = UserSchema.omit({
   _id: true,

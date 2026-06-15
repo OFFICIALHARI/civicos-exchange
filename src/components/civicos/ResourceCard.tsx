@@ -1,52 +1,77 @@
-import { MapPin, Clock, Tag } from "lucide-react";
+import { MapPin, Tag, User, BarChart2, ExternalLink } from "lucide-react";
 import type { Resource } from "@/lib/civicos/types";
 import { StatusBadge } from "./StatusBadge";
+import { formatCurrencyCompact } from "@/lib/civicos/currency";
+import { cn } from "@/lib/utils";
 
-const KIND_LABEL: Record<Resource["kind"], string> = {
-  parking: "Parking",
-  ev_charger: "EV Charger",
-  solar_share: "Solar Share",
-  community_room: "Community Room",
-};
+export function ResourceCard({
+  resource,
+  onView,
+}: {
+  resource: Resource;
+  onView?: (r: Resource) => void;
+}) {
+  const utilization = Math.round((resource.utilization ?? 0) * 100);
 
-export function ResourceCard({ resource, onAction }: { resource: Resource; onAction?: (r: Resource) => void }) {
   return (
-    <div className="group rounded-xl border border-border bg-card/70 p-4 transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:bg-card">
-      <div className="flex items-start justify-between gap-3">
+    <div className="group rounded-2xl border border-border bg-card/30 p-5 transition-all duration-300 hover:bg-card/50 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5">
+      <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <div className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
-            {KIND_LABEL[resource.kind]}
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary border border-primary/20 uppercase tracking-wider">
+              {resource.kind.replace("_", " ")}
+            </span>
           </div>
-          <div className="mt-0.5 truncate text-sm font-semibold text-foreground">{resource.title}</div>
-          <div className="mt-0.5 truncate text-xs text-muted-foreground">{resource.owner} · {resource.community}</div>
+          <div className="mt-2 truncate text-base font-bold text-foreground/90 tracking-tight group-hover:text-primary transition-colors">
+            {resource.title}
+          </div>
         </div>
         <StatusBadge status={resource.status} />
       </div>
 
-      <dl className="mt-3 grid grid-cols-2 gap-y-1.5 text-xs">
-        <dt className="flex items-center gap-1 text-muted-foreground"><MapPin className="h-3 w-3" /> Location</dt>
-        <dd className="text-right truncate">{resource.location}</dd>
-        <dt className="flex items-center gap-1 text-muted-foreground"><Clock className="h-3 w-3" /> Window</dt>
-        <dd className="text-right tabular-nums">{resource.availability.start}–{resource.availability.end}</dd>
-        {resource.pricePerHour !== undefined && <>
-          <dt className="flex items-center gap-1 text-muted-foreground"><Tag className="h-3 w-3" /> Price</dt>
-          <dd className="text-right tabular-nums">€{resource.pricePerHour.toFixed(2)}/h</dd>
-        </>}
-      </dl>
+      <div className="mt-4 grid grid-cols-2 gap-4">
+        <div className="space-y-1">
+          <span className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest flex items-center gap-1">
+            <MapPin className="h-2.5 w-2.5" /> Location
+          </span>
+          <div className="text-[11px] font-medium text-muted-foreground truncate">{resource.location}</div>
+        </div>
+        <div className="space-y-1">
+          <span className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest flex items-center gap-1">
+            <User className="h-2.5 w-2.5" /> Owner
+          </span>
+          <div className="text-[11px] font-medium text-muted-foreground truncate">{resource.owner}</div>
+        </div>
+      </div>
 
-      <div className="mt-3 flex items-center justify-between gap-3 border-t border-border pt-3">
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Match</span>
-          <div className="h-1.5 w-20 overflow-hidden rounded-full bg-muted">
-            <div className="h-full bg-primary" style={{ width: `${Math.round((resource.matchScore ?? 0) * 100)}%` }} />
-          </div>
-          <span className="text-xs font-medium tabular-nums">{Math.round((resource.matchScore ?? 0) * 100)}</span>
+      <div className="mt-5 space-y-2">
+        <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40">
+          <span className="flex items-center gap-1"><BarChart2 className="h-2.5 w-2.5" /> Utilization</span>
+          <span className="text-foreground/60">{utilization}%</span>
+        </div>
+        <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-muted/30">
+          <div
+            className={cn(
+              "absolute inset-y-0 left-0 rounded-full transition-all duration-500",
+              utilization > 80 ? "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.3)]" : "bg-primary shadow-[0_0_8px_rgba(63,107,79,0.3)]"
+            )}
+            style={{ width: `${utilization}%` }}
+          />
+        </div>
+      </div>
+
+      <div className="mt-5 flex items-center justify-between border-t border-border/40 pt-4">
+        <div className="flex flex-col">
+          <span className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest">Rate</span>
+          <span className="text-sm font-bold text-foreground">
+            {resource.pricePerHour !== undefined ? `${formatCurrencyCompact(resource.pricePerHour)}/hr` : "Free"}
+          </span>
         </div>
         <button
-          onClick={() => onAction?.(resource)}
-          className="rounded-md border border-border bg-surface px-2.5 py-1 text-xs hover:border-primary/40 hover:bg-elevated hover:text-primary"
+          onClick={() => onView?.(resource)}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface/50 px-3 py-1.5 text-xs font-bold text-foreground transition-all hover:bg-primary hover:text-primary-foreground hover:border-primary active:scale-95"
         >
-          View
+          View <ExternalLink className="h-3 w-3" />
         </button>
       </div>
     </div>

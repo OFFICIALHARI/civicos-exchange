@@ -4,7 +4,10 @@ import { z } from "zod";
 const objectIdSchema = z
   .union([
     z.instanceof(ObjectId),
-    z.string().trim().regex(/^[a-fA-F0-9]{24}$/, "Expected a MongoDB ObjectId string"),
+    z
+      .string()
+      .trim()
+      .regex(/^[a-fA-F0-9]{24}$/, "Expected a MongoDB ObjectId string"),
   ])
   .transform((value) => (typeof value === "string" ? new ObjectId(value) : value));
 
@@ -29,7 +32,7 @@ export const RequestTimeWindowSchema = z
     path: ["end"],
   });
 
-export interface RequestTimeWindow extends z.infer<typeof RequestTimeWindowSchema> {}
+export type RequestTimeWindow = z.infer<typeof RequestTimeWindowSchema>;
 
 export const RequestSchema = z.object({
   _id: objectIdSchema,
@@ -45,7 +48,7 @@ export const RequestSchema = z.object({
 });
 
 export type RequestDocument = z.infer<typeof RequestSchema>;
-export interface Request extends RequestDocument {}
+export type Request = RequestDocument;
 
 export const RequestCreateInputSchema = RequestSchema.omit({
   _id: true,

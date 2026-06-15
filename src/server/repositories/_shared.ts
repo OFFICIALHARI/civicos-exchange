@@ -7,6 +7,7 @@ import type { LedgerEntryDocument } from "@/server/models/ledger-entry";
 import type { RequestDocument } from "@/server/models/request";
 import type { ResourceDocument } from "@/server/models/resource";
 import type { UserDocument } from "@/server/models/user";
+import type { HistoricalMetricDocument } from "@/server/models/historical-metric";
 
 export type ObjectIdLike = string | ObjectId;
 
@@ -29,6 +30,7 @@ type TypedCollections = {
   requests: Collection<RequestDocument>;
   resources: Collection<ResourceDocument>;
   users: Collection<UserDocument>;
+  historicalMetrics: Collection<HistoricalMetricDocument>;
 };
 
 export async function getTypedCollections(): Promise<TypedCollections> {
@@ -41,5 +43,7 @@ export async function getTypedCollections(): Promise<TypedCollections> {
     requests: collections.requests as unknown as Collection<RequestDocument>,
     resources: collections.resources as unknown as Collection<ResourceDocument>,
     users: collections.users as unknown as Collection<UserDocument>,
+    historicalMetrics:
+      collections.historicalMetrics as unknown as Collection<HistoricalMetricDocument>,
   };
 }

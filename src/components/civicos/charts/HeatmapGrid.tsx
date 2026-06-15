@@ -1,8 +1,14 @@
 import { cn } from "@/lib/utils";
 
 export function HeatmapGrid({
-  rows = 7, cols = 24, intensity,
-}: { rows?: number; cols?: number; intensity?: (r: number, c: number) => number }) {
+  rows = 7,
+  cols = 24,
+  intensity,
+}: {
+  rows?: number;
+  cols?: number;
+  intensity?: (r: number, c: number) => number;
+}) {
   const fn = intensity ?? ((r, c) => (Math.sin(r + c / 3) + 1) / 2);
   return (
     <div
@@ -10,7 +16,8 @@ export function HeatmapGrid({
       style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
     >
       {Array.from({ length: rows * cols }).map((_, i) => {
-        const r = Math.floor(i / cols), c = i % cols;
+        const r = Math.floor(i / cols),
+          c = i % cols;
         const v = Math.min(1, Math.max(0, fn(r, c)));
         return (
           <div

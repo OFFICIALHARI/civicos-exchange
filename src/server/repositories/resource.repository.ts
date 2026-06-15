@@ -32,8 +32,18 @@ export async function findById(id: ObjectIdLike): Promise<ResourceDocument | nul
 }
 
 export async function findAll(): Promise<ResourceDocument[]> {
-  const collection = await getResourceCollection();
-  return collection.find({}).sort({ createdAt: -1 }).toArray();
+  try {
+    const collection = await getResourceCollection();
+
+    const cursor = collection.find({}).sort({ createdAt: -1 });
+
+    const results = await cursor.toArray();
+
+    return results;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 }
 
 export async function findAvailable(): Promise<ResourceDocument[]> {
@@ -71,5 +81,8 @@ export async function findByType(type: ResourceType): Promise<ResourceDocument[]
 
 export async function findByOwner(ownerId: ObjectIdLike): Promise<ResourceDocument[]> {
   const collection = await getResourceCollection();
-  return collection.find({ _id: { $exists: true }, ownerId: toObjectId(ownerId, "Owner id") }).sort({ createdAt: -1 }).toArray();
+  return collection
+    .find({ _id: { $exists: true }, ownerId: toObjectId(ownerId, "Owner id") })
+    .sort({ createdAt: -1 })
+    .toArray();
 }

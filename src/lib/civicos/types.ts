@@ -1,5 +1,14 @@
 export type ResourceKind = "parking" | "ev_charger" | "solar_share" | "community_room";
-export type Status = "available" | "reserved" | "in_use" | "offline" | "pending" | "matched" | "confirmed" | "failed" | "unmatched";
+export type Status =
+  | "available"
+  | "reserved"
+  | "in_use"
+  | "offline"
+  | "pending"
+  | "matched"
+  | "confirmed"
+  | "failed"
+  | "unmatched";
 export type Urgency = "low" | "medium" | "high" | "critical";
 export type TimeRange = "1h" | "8h" | "1d" | "1w" | "1m" | "6m" | "1y";
 
@@ -62,8 +71,17 @@ export interface Insight {
   delta?: number;
 }
 
-export interface ForecastPoint { t: string; value: number }
-export interface Forecast { id: string; label: string; horizon: string; series: ForecastPoint[]; expected: number }
+export interface ForecastPoint {
+  t: string;
+  value: number;
+}
+export interface Forecast {
+  id: string;
+  label: string;
+  horizon: string;
+  series: ForecastPoint[];
+  expected: number;
+}
 
 export interface Metrics {
   communityValue?: number;
@@ -80,5 +98,15 @@ export interface Metrics {
   netImpact?: number;
 }
 
-export interface TrendPoint { t: string; value: number; volume?: number }
-export interface ActivityItem { id: string; kind: "match" | "list" | "request" | "ledger" | "system"; title: string; meta: string; timestamp: string }
+export interface TrendPoint {
+  t: string;
+  value: number;
+  volume?: number;
+}
+export interface ActivityItem {
+  id: string;
+  kind: "match" | "list" | "request" | "ledger" | "system";
+  title: string;
+  meta: string;
+  timestamp: string;
+}

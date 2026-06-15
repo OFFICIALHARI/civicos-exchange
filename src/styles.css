@@ -52,95 +52,108 @@
 }
 
 :root {
-  --radius: 0.75rem;
-  --background: oklch(0.14 0 0);
-  --foreground: oklch(0.97 0 0);
-  --surface: oklch(0.17 0 0);
-  --elevated: oklch(0.21 0 0);
-  --card: oklch(0.19 0 0);
-  --card-foreground: oklch(0.97 0 0);
-  --popover: oklch(0.19 0 0);
-  --popover-foreground: oklch(0.97 0 0);
-  --primary: oklch(0.92 0.20 122);
-  --primary-foreground: oklch(0.14 0 0);
-  --neon: oklch(0.92 0.20 122);
-  --secondary: oklch(0.24 0 0);
-  --secondary-foreground: oklch(0.97 0 0);
-  --muted: oklch(0.22 0 0);
-  --muted-foreground: oklch(0.66 0 0);
-  --accent: oklch(0.26 0 0);
-  --accent-foreground: oklch(0.97 0 0);
-  --destructive: oklch(0.62 0.20 25);
-  --destructive-foreground: oklch(0.97 0 0);
-  --success: oklch(0.72 0.18 152);
-  --warning: oklch(0.84 0.17 85);
-  --border: oklch(0.27 0 0);
-  --input: oklch(0.27 0 0);
-  --ring: oklch(0.92 0.20 122);
-  --chart-1: oklch(0.92 0.20 122);
-  --chart-2: oklch(0.72 0.18 152);
-  --chart-3: oklch(0.84 0.17 85);
-  --chart-4: oklch(0.55 0.18 250);
-  --chart-5: oklch(0.62 0.20 25);
-  --sidebar: oklch(0.16 0 0);
-  --sidebar-foreground: oklch(0.97 0 0);
-  --sidebar-primary: oklch(0.92 0.20 122);
-  --sidebar-primary-foreground: oklch(0.14 0 0);
-  --sidebar-accent: oklch(0.22 0 0);
-  --sidebar-accent-foreground: oklch(0.97 0 0);
-  --sidebar-border: oklch(0.24 0 0);
-  --sidebar-ring: oklch(0.92 0.20 122);
+  --radius: 0.5rem;
+  --background: #121514;
+  --foreground: #e1e1e1;
+  --surface: #171b19;
+  --elevated: #1e2421;
+  --card: #1a1f1d;
+  --card-foreground: #e1e1e1;
+  --popover: #1a1f1d;
+  --popover-foreground: #e1e1e1;
+  --primary: #3f6b4f;
+  --primary-foreground: #ffffff;
+  --neon: #5d8a6b;
+  --secondary: #314539;
+  --secondary-foreground: #e1e1e1;
+  --muted: #1e2421;
+  --muted-foreground: #a1a1a1;
+  --accent: #314539;
+  --accent-foreground: #ffffff;
+  --destructive: #7f1d1d;
+  --destructive-foreground: #fef2f2;
+  --success: #5e8768;
+  --warning: #854d0e;
+  --border: #2a312e;
+  --input: #2a312e;
+  --ring: #3f6b4f;
+  --chart-1: #3f6b4f;
+  --chart-2: #5d8a6b;
+  --chart-3: #709a7d;
+  --chart-4: #5e8768;
+  --chart-5: #314539;
+  --sidebar: #121514;
+  --sidebar-foreground: #a1a1a1;
+  --sidebar-primary: #3f6b4f;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1a1f1d;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #1e2421;
+  --sidebar-ring: #3f6b4f;
 }
 
 .dark {
-  --background: oklch(0.14 0 0);
-  --foreground: oklch(0.97 0 0);
+  --background: #121514;
+  --foreground: #e1e1e1;
 }
 
 @layer base {
   * {
     border-color: var(--color-border);
   }
-  html, body {
+  html,
+  body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.01em;
   }
-  .font-mono, .tabular-nums {
+  .font-mono,
+  .tabular-nums {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
   }
 }
 
 @utility glass-card {
-  background: color-mix(in oklab, var(--card) 70%, transparent);
-  backdrop-filter: blur(10px);
-  border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+  background: color-mix(in srgb, var(--card) 70%, transparent);
+  backdrop-filter: blur(12px);
+  border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
 }
 
-@utility neon-glow {
-  box-shadow: 0 0 0 1px color-mix(in oklab, var(--neon) 40%, transparent),
-              0 8px 32px -8px color-mix(in oklab, var(--neon) 35%, transparent);
+@utility forest-glow {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--primary) 20%, transparent),
+    0 4px 20px -4px color-mix(in srgb, var(--primary) 15%, transparent);
 }
 
 @utility shimmer {
   background: linear-gradient(
     90deg,
-    color-mix(in oklab, var(--muted) 60%, transparent) 0%,
-    color-mix(in oklab, var(--muted) 90%, transparent) 50%,
-    color-mix(in oklab, var(--muted) 60%, transparent) 100%
+    color-mix(in srgb, var(--muted) 40%, transparent) 0%,
+    color-mix(in srgb, var(--muted) 80%, transparent) 50%,
+    color-mix(in srgb, var(--muted) 40%, transparent) 100%
   );
   background-size: 200% 100%;
-  animation: shimmer 1.6s ease-in-out infinite;
+  animation: shimmer 2s ease-in-out infinite;
 }
 
 @keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 @keyframes pulse-line {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
 }

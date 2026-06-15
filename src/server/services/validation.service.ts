@@ -25,10 +25,10 @@ export async function clearDatabase() {
 export async function seedScenarioA() {
   // Scenario A: Match Success (Resource + Request)
   await clearDatabase();
-  
+
   const ownerId = new ObjectId();
   const userId = new ObjectId();
-  
+
   const resource = await resourceRepository.create({
     ownerId,
     type: "ev",
@@ -40,7 +40,7 @@ export async function seedScenarioA() {
       end: new Date(Date.now() + 8 * 3600000),
     },
     quantity: 1,
-    price: 5.0,
+    price: 500,
     status: "listed",
   });
 
@@ -48,7 +48,7 @@ export async function seedScenarioA() {
     userId,
     resourceType: "ev",
     location: "Civic Plaza",
-    maxPrice: 10,
+    maxPrice: 1000,
     priority: 5,
     timeWindow: {
       start: new Date(Date.now() + 3600000),
@@ -64,16 +64,16 @@ export async function seedScenarioA() {
 export async function seedScenarioB() {
   // Scenario B: Risk Insight (High Demand / Low Supply)
   await clearDatabase();
-  
+
   const userId = new ObjectId();
-  
+
   // Create 5 requests for only 1 resource
   for (let i = 0; i < 5; i++) {
     await requestRepository.create({
       userId,
       resourceType: "parking",
       location: "Riverside",
-      maxPrice: 10,
+      maxPrice: 1000,
       priority: 9,
       timeWindow: { start: new Date(), end: new Date(Date.now() + 3600000) },
       status: "pending",
@@ -88,7 +88,7 @@ export async function seedScenarioB() {
     location: "Riverside",
     availability: { start: new Date(), end: new Date(Date.now() + 86400000) },
     quantity: 1,
-    price: 2,
+    price: 200,
     status: "listed",
   });
 
@@ -101,7 +101,7 @@ export async function seedScenarioB() {
 export async function seedScenarioC() {
   // Scenario C: Opportunity Insight (Underutilization)
   await clearDatabase();
-  
+
   // 10 resources listed, 0 requests
   for (let i = 0; i < 10; i++) {
     await resourceRepository.create({
@@ -112,7 +112,7 @@ export async function seedScenarioC() {
       location: "Sunfield",
       availability: { start: new Date(), end: new Date(Date.now() + 86400000) },
       quantity: 1,
-      price: 1,
+      price: 100,
       status: "listed",
     });
   }

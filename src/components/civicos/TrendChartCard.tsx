@@ -7,6 +7,7 @@ import { MarketPulseChart } from "./charts/MarketPulseChart";
 import { ChartSkeleton } from "./LoadingSkeletons";
 import { EmptyState, ErrorState } from "./EmptyState";
 import { ArrowUpRight, Plus, CreditCard, Camera } from "lucide-react";
+import { formatCurrency } from "@/lib/civicos/currency";
 
 export function TrendChartCard() {
   const [range, setRange] = useState<TimeRange>("6m");
@@ -22,7 +23,7 @@ export function TrendChartCard() {
             <span className="text-xs text-muted-foreground">Community Resource Value</span>
             <span className="mt-1 flex items-baseline gap-2">
               <span className="text-3xl font-semibold tracking-tight tabular-nums">
-                {m?.communityValue !== undefined ? `$${m.communityValue.toLocaleString()}` : "—"}
+                {m?.communityValue !== undefined ? formatCurrency(m.communityValue) : "—"}
               </span>
               {m?.communityValueDeltaPct !== undefined && (
                 <span className="inline-flex items-center gap-0.5 rounded-md bg-primary/15 px-1.5 py-0.5 text-[11px] font-medium text-primary">
@@ -34,9 +35,15 @@ export function TrendChartCard() {
         }
         action={
           <div className="flex items-center gap-1.5">
-            <IconBtn><Plus className="h-3.5 w-3.5" /></IconBtn>
-            <IconBtn><CreditCard className="h-3.5 w-3.5" /></IconBtn>
-            <IconBtn><Camera className="h-3.5 w-3.5" /></IconBtn>
+            <IconBtn>
+              <Plus className="h-3.5 w-3.5" />
+            </IconBtn>
+            <IconBtn>
+              <CreditCard className="h-3.5 w-3.5" />
+            </IconBtn>
+            <IconBtn>
+              <Camera className="h-3.5 w-3.5" />
+            </IconBtn>
           </div>
         }
       />
@@ -45,10 +52,15 @@ export function TrendChartCard() {
       </div>
       <CardBody className="pt-0">
         <div className="h-[300px] w-full rounded-lg border border-border bg-background/40 p-2">
-          {isLoading ? <ChartSkeleton className="h-full" />
-            : isError ? <ErrorState onRetry={() => refetch()} />
-            : !data || data.length === 0 ? <EmptyState title="No market activity" />
-            : <MarketPulseChart data={data} />}
+          {isLoading ? (
+            <ChartSkeleton className="h-full" />
+          ) : isError ? (
+            <ErrorState onRetry={() => refetch()} />
+          ) : !data || data.length === 0 ? (
+            <EmptyState title="No market activity" />
+          ) : (
+            <MarketPulseChart data={data} />
+          )}
         </div>
       </CardBody>
     </Card>

@@ -7,7 +7,12 @@ import { cn } from "@/lib/utils";
 const TABS = ["Profile", "Community", "Notifications", "Theme", "Permissions", "API"] as const;
 
 export const Route = createFileRoute("/settings")({
-  head: () => ({ meta: [{ title: "Settings · CivicOS" }, { name: "description", content: "Operator settings, permissions, and API connections." }] }),
+  head: () => ({
+    meta: [
+      { title: "Settings · CivicOS" },
+      { name: "description", content: "Operator settings, permissions, and API connections." },
+    ],
+  }),
   component: Settings,
 });
 
@@ -24,7 +29,9 @@ function Settings() {
             onClick={() => setTab(t)}
             className={cn(
               "rounded-md px-3 py-1.5 text-xs",
-              tab === t ? "bg-card text-foreground ring-1 ring-primary/40" : "text-muted-foreground hover:text-foreground",
+              tab === t
+                ? "bg-card text-foreground ring-1 ring-primary/40"
+                : "text-muted-foreground hover:text-foreground",
             )}
           >
             {t}
@@ -45,7 +52,7 @@ function Settings() {
           {tab === "Community" && (
             <>
               <Field label="Default community" placeholder="Riverside" />
-              <Field label="Timezone" placeholder="Europe/Lisbon" />
+              <Field label="Timezone" placeholder="Asia/Kolkata" />
             </>
           )}
           {tab === "Notifications" && (
@@ -61,7 +68,11 @@ function Settings() {
               <Field label="Accent" placeholder="Neon lime" />
             </>
           )}
-          {tab === "Permissions" && <div className="text-xs text-muted-foreground">Role-based access control will appear here once configured.</div>}
+          {tab === "Permissions" && (
+            <div className="text-xs text-muted-foreground">
+              Role-based access control will appear here once configured.
+            </div>
+          )}
           {tab === "API" && (
             <>
               <Field label="Webhook endpoint" placeholder="https://" />
@@ -69,7 +80,9 @@ function Settings() {
             </>
           )}
           <div className="flex justify-end">
-            <button className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90">Save</button>
+            <button className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90">
+              Save
+            </button>
           </div>
         </CardBody>
       </Card>
@@ -80,7 +93,9 @@ function Settings() {
 function Field({ label, placeholder }: { label: string; placeholder?: string }) {
   return (
     <label className="block">
-      <span className="block text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{label}</span>
+      <span className="block text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+        {label}
+      </span>
       <input
         placeholder={placeholder}
         className="mt-1 h-9 w-full rounded-md border border-border bg-surface px-3 text-sm placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none"
@@ -97,9 +112,17 @@ function Toggle({ label, defaultChecked }: { label: string; defaultChecked?: boo
       <button
         type="button"
         onClick={() => setOn((v) => !v)}
-        className={cn("relative h-5 w-9 rounded-full transition-colors", on ? "bg-primary" : "bg-muted")}
+        className={cn(
+          "relative h-5 w-9 rounded-full transition-colors",
+          on ? "bg-primary" : "bg-muted",
+        )}
       >
-        <span className={cn("absolute top-0.5 h-4 w-4 rounded-full bg-background transition-all", on ? "left-[18px]" : "left-0.5")} />
+        <span
+          className={cn(
+            "absolute top-0.5 h-4 w-4 rounded-full bg-background transition-all",
+            on ? "left-[18px]" : "left-0.5",
+          )}
+        />
       </button>
     </label>
   );

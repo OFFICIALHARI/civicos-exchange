@@ -71,15 +71,22 @@ export const createResource = createServerFn({ method: "POST" })
     }
   });
 
-export const getResources = createServerFn({ method: "POST" })
-  .handler(async (): Promise<ResourceResponse[]> => {
+export const getResources = createServerFn({ method: "POST" }).handler(
+  async (): Promise<ResourceResponse[]> => {
     try {
       const { findAll } = await loadResourceRepository();
-      return (await findAll()).map(serializeResource);
+
+      const resources = await findAll();
+
+      const result = resources.map(serializeResource);
+
+      return result;
     } catch (error) {
+      console.error(error);
       wrapError("fetch resources", error);
     }
-  });
+  },
+);
 
 export const getResourceById = createServerFn({ method: "POST" })
   .inputValidator(z.object({ id: resourceIdSchema }))
@@ -138,12 +145,13 @@ export const getResourcesByOwner = createServerFn({ method: "POST" })
     }
   });
 
-export const getAvailableResources = createServerFn({ method: "POST" })
-  .handler(async (): Promise<ResourceResponse[]> => {
+export const getAvailableResources = createServerFn({ method: "POST" }).handler(
+  async (): Promise<ResourceResponse[]> => {
     try {
       const { findAvailable } = await loadResourceRepository();
       return (await findAvailable()).map(serializeResource);
     } catch (error) {
       wrapError("fetch available resources", error);
     }
-  });
+  },
+);

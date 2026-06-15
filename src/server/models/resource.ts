@@ -4,7 +4,10 @@ import { z } from "zod";
 const objectIdSchema = z
   .union([
     z.instanceof(ObjectId),
-    z.string().trim().regex(/^[a-fA-F0-9]{24}$/, "Expected a MongoDB ObjectId string"),
+    z
+      .string()
+      .trim()
+      .regex(/^[a-fA-F0-9]{24}$/, "Expected a MongoDB ObjectId string"),
   ])
   .transform((value) => (typeof value === "string" ? new ObjectId(value) : value));
 
@@ -26,7 +29,7 @@ export const ResourceAvailabilitySchema = z
     path: ["end"],
   });
 
-export interface ResourceAvailability extends z.infer<typeof ResourceAvailabilitySchema> {}
+export type ResourceAvailability = z.infer<typeof ResourceAvailabilitySchema>;
 
 export const ResourceSchema = z.object({
   _id: objectIdSchema,
@@ -44,7 +47,7 @@ export const ResourceSchema = z.object({
 });
 
 export type ResourceDocument = z.infer<typeof ResourceSchema>;
-export interface Resource extends ResourceDocument {}
+export type Resource = ResourceDocument;
 
 export const ResourceCreateInputSchema = ResourceSchema.omit({
   _id: true,

@@ -27,5 +27,8 @@ export async function findLatest(): Promise<InsightDocument | null> {
 
 export async function findByCommunity(communityId: ObjectIdLike): Promise<InsightDocument[]> {
   const collection = await getInsightCollection();
-  return collection.find({ communityId: toObjectId(communityId, "Community id") }).sort({ generatedAt: -1 }).toArray();
+  return collection
+    .find({ communityId: toObjectId(communityId, "Community id") })
+    .sort({ generatedAt: -1 })
+    .toArray();
 }

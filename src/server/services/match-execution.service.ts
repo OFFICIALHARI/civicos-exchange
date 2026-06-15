@@ -3,7 +3,10 @@ import type { RequestDocument } from "@/server/models/request";
 import type { MatchResult } from "@/server/services/matching.service";
 
 import { completeBooking, createBookingFromMatch } from "@/server/services/booking.service";
-import { createLedgerEntriesFromBookings, type LedgerEntryRecord } from "@/server/services/ledger.service";
+import {
+  createLedgerEntriesFromBookings,
+  type LedgerEntryRecord,
+} from "@/server/services/ledger.service";
 import { findBestMatchForRequest, findBestMatches } from "@/server/services/matching.service";
 import { recordMarketplaceSnapshot } from "@/server/services/historical-metric.service";
 
@@ -73,7 +76,9 @@ function createEmptySummary(): MatchExecutionSummary {
 export function generateExecutionSummary(input: ExecutionSummaryInput): MatchExecutionSummary {
   const totalMatchesFound = input.matches.length;
   const averageMatchScore =
-    totalMatchesFound === 0 ? 0 : input.matches.reduce((sum, match) => sum + match.score, 0) / totalMatchesFound;
+    totalMatchesFound === 0
+      ? 0
+      : input.matches.reduce((sum, match) => sum + match.score, 0) / totalMatchesFound;
 
   return {
     totalResourcesEvaluated: input.totalResourcesEvaluated ?? totalMatchesFound,
@@ -113,19 +118,35 @@ async function executeMatch(match: MatchResult): Promise<{
 
   const bookingResult = await createBookingFromMatch(match);
   if (!bookingResult) {
-    issues.push(createIssue("booking", "BOOKING_FAILED", "Unable to create booking from match.", { requestId: match.requestId, resourceId: match.resourceId }));
+    issues.push(
+      createIssue("booking", "BOOKING_FAILED", "Unable to create booking from match.", {
+        requestId: match.requestId,
+        resourceId: match.resourceId,
+      }),
+    );
     return { match, bookings: [], ledgerEntries: [], issues };
   }
 
   const completedBooking = await completeBooking(bookingResult._id);
   if (!completedBooking) {
-    issues.push(createIssue("booking", "BOOKING_FAILED", "Unable to complete booking after creation.", { bookingId: bookingResult._id.toHexString() }));
+    issues.push(
+      createIssue("booking", "BOOKING_FAILED", "Unable to complete booking after creation.", {
+        bookingId: bookingResult._id.toHexString(),
+      }),
+    );
     return { match, bookings: [bookingResult], ledgerEntries: [], issues };
   }
 
   const ledgerResult = await createLedgerEntriesFromBookings([completedBooking]);
   if (!ledgerResult.ok) {
-    issues.push(createIssue("ledger", "LEDGER_FAILED", ledgerResult.error.message, ledgerResult.error.details));
+    issues.push(
+      createIssue(
+        "ledger",
+        "LEDGER_FAILED",
+        ledgerResult.error.message,
+        ledgerResult.error.details,
+      ),
+    );
     return { match, bookings: [completedBooking], ledgerEntries: [], issues };
   }
 
@@ -154,7 +175,13 @@ export async function executeMatchingCycle(): Promise<MatchExecutionReport> {
         [],
         [],
         [],
-        [createIssue("matching", "NO_MATCHES_FOUND", "No matches were found for the current cycle.")],
+        [
+          createIssue(
+            "matching",
+            "NO_MATCHES_FOUND",
+            "No matches were found for the current cycle.",
+          ),
+        ],
       );
     }
 
@@ -178,7 +205,11 @@ export async function executeMatchingCycle(): Promise<MatchExecutionReport> {
     });
 
     const status: MatchExecutionReport["status"] =
-      issues.length === 0 ? "completed" : bookings.length > 0 || ledgerEntries.length > 0 ? "partial" : "failed";
+      issues.length === 0
+        ? "completed"
+        : bookings.length > 0 || ledgerEntries.length > 0
+          ? "partial"
+          : "failed";
 
     // Record a snapshot of the marketplace state after the cycle
     if (status !== "failed") {
@@ -190,11 +221,20 @@ export async function executeMatchingCycle(): Promise<MatchExecutionReport> {
     return buildReport(status, summary, matches, bookings, ledgerEntries, issues);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Matching execution failed.";
-    return buildReport("failed", createEmptySummary(), [], [], [], [createIssue("matching", "EXECUTION_FAILED", message)]);
+    return buildReport(
+      "failed",
+      createEmptySummary(),
+      [],
+      [],
+      [],
+      [createIssue("matching", "EXECUTION_FAILED", message)],
+    );
   }
 }
 
-export async function executeMatchingForRequest(request: RequestDocument): Promise<MatchExecutionReport> {
+export async function executeMatchingForRequest(
+  request: RequestDocument,
+): Promise<MatchExecutionReport> {
   try {
     const match = await findBestMatchForRequest(request);
 
@@ -211,7 +251,14 @@ export async function executeMatchingForRequest(request: RequestDocument): Promi
         [],
         [],
         [],
-        [createIssue("matching", "NO_MATCHES_FOUND", "No match was found for the provided request.", { requestId: request._id.toHexString() })],
+        [
+          createIssue(
+            "matching",
+            "NO_MATCHES_FOUND",
+            "No match was found for the provided request.",
+            { requestId: request._id.toHexString() },
+          ),
+        ],
       );
     }
 
@@ -227,9 +274,27 @@ export async function executeMatchingForRequest(request: RequestDocument): Promi
     const issues = execution.issues.length > 0 ? execution.issues : [];
     const status: MatchExecutionReport["status"] = issues.length === 0 ? "completed" : "partial";
 
-    return buildReport(status, summary, [match], execution.bookings, execution.ledgerEntries, issues);
+    return buildReport(
+      status,
+      summary,
+      [match],
+      execution.bookings,
+      execution.ledgerEntries,
+      issues,
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Request execution failed.";
-    return buildReport("failed", createEmptySummary(), [], [], [], [createIssue("matching", "EXECUTION_FAILED", message, { requestId: request._id.toHexString() })]);
+    return buildReport(
+      "failed",
+      createEmptySummary(),
+      [],
+      [],
+      [],
+      [
+        createIssue("matching", "EXECUTION_FAILED", message, {
+          requestId: request._id.toHexString(),
+        }),
+      ],
+    );
   }
 }

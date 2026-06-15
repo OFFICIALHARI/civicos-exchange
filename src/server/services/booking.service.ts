@@ -45,7 +45,10 @@ function buildLedgerEntry(booking: BookingDocument): LedgerEntryDocument {
   };
 }
 
-async function createLifecycleBooking(match: MatchResult, status: BookingLifecycleStatus): Promise<BookingLifecycleContext> {
+async function createLifecycleBooking(
+  match: MatchResult,
+  status: BookingLifecycleStatus,
+): Promise<BookingLifecycleContext> {
   const [request, resource] = await Promise.all([
     requestRepository.findById(match.requestId),
     resourceRepository.findById(match.resourceId),
@@ -75,7 +78,10 @@ async function createLifecycleBooking(match: MatchResult, status: BookingLifecyc
   };
 }
 
-async function updateBookingLifecycle(bookingId: string | ObjectId, status: BookingLifecycleStatus): Promise<BookingDocument | null> {
+async function updateBookingLifecycle(
+  bookingId: string | ObjectId,
+  status: BookingLifecycleStatus,
+): Promise<BookingDocument | null> {
   const booking = await bookingRepository.findById(bookingId);
   if (!booking) {
     return null;
@@ -92,26 +98,47 @@ async function updateBookingLifecycle(bookingId: string | ObjectId, status: Book
   });
 }
 
-async function applyRequestAndResourceState(context: BookingLifecycleContext, nextStatus: BookingLifecycleStatus): Promise<void> {
+async function applyRequestAndResourceState(
+  context: BookingLifecycleContext,
+  nextStatus: BookingLifecycleStatus,
+): Promise<void> {
   if (nextStatus === "cancelled") {
     await Promise.all([
-      requestRepository.update({ _id: context.request._id, status: "pending" satisfies RequestStatus }),
-      resourceRepository.update({ _id: context.resource._id, status: "listed" satisfies ResourceStatus }),
+      requestRepository.update({
+        _id: context.request._id,
+        status: "pending" satisfies RequestStatus,
+      }),
+      resourceRepository.update({
+        _id: context.resource._id,
+        status: "listed" satisfies ResourceStatus,
+      }),
     ]);
     return;
   }
 
   if (nextStatus === "completed") {
     await Promise.all([
-      requestRepository.update({ _id: context.request._id, status: "completed" satisfies RequestStatus }),
-      resourceRepository.update({ _id: context.resource._id, status: "booked" satisfies ResourceStatus }),
+      requestRepository.update({
+        _id: context.request._id,
+        status: "completed" satisfies RequestStatus,
+      }),
+      resourceRepository.update({
+        _id: context.resource._id,
+        status: "booked" satisfies ResourceStatus,
+      }),
     ]);
     return;
   }
 
   await Promise.all([
-    requestRepository.update({ _id: context.request._id, status: "matched" satisfies RequestStatus }),
-    resourceRepository.update({ _id: context.resource._id, status: "reserved" satisfies ResourceStatus }),
+    requestRepository.update({
+      _id: context.request._id,
+      status: "matched" satisfies RequestStatus,
+    }),
+    resourceRepository.update({
+      _id: context.resource._id,
+      status: "reserved" satisfies ResourceStatus,
+    }),
   ]);
 }
 
@@ -121,7 +148,9 @@ export async function createBookingFromMatch(match: MatchResult): Promise<Bookin
   return context.booking;
 }
 
-export async function findBookingById(bookingId: string | ObjectId): Promise<BookingDocument | null> {
+export async function findBookingById(
+  bookingId: string | ObjectId,
+): Promise<BookingDocument | null> {
   return bookingRepository.findById(bookingId);
 }
 
@@ -137,7 +166,9 @@ export async function findCompletedBookings(): Promise<BookingDocument[]> {
   return bookingRepository.findCompleted();
 }
 
-export async function completeBooking(bookingId: string | ObjectId): Promise<BookingDocument | null> {
+export async function completeBooking(
+  bookingId: string | ObjectId,
+): Promise<BookingDocument | null> {
   const booking = await bookingRepository.findById(bookingId);
   if (!booking) {
     return null;

@@ -5,5 +5,10 @@ import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  plugins: [tsConfigPaths(), tanstackStart({ server: { entry: "server" } }), viteReact(), tailwindcss()],
+  plugins: [
+    tsConfigPaths(),
+    tanstackStart({ server: { entry: "server" } }),
+    viteReact(),
+    tailwindcss(),
+  ],
 });

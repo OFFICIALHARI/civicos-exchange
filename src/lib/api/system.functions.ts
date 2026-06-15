@@ -22,17 +22,30 @@ function verifySecret(secret?: string) {
 }
 
 export const runScenario = createServerFn({ method: "POST" })
-  .inputValidator(z.object({ 
-    scenario: z.enum(["A", "B", "C"]),
-    secret: z.string().optional()
-  }))
+  .inputValidator(
+    z.object({
+      scenario: z.enum(["A", "B", "C"]),
+      secret: z.string().optional(),
+    }),
+  )
   .handler(async ({ data }) => {
     try {
       verifySecret(data.secret);
       const svc = await loadValidationService();
-      if (data.scenario === "A") return await svc.seedScenarioA();
-      if (data.scenario === "B") return await svc.seedScenarioB();
-      if (data.scenario === "C") return await svc.seedScenarioC();
+      if (data.scenario === "A") {
+        const result = await svc.seedScenarioA();
+        // Basic serialization for the report if needed,
+        // but for now we'll just return a success message or simplified object
+        return { success: true, scenario: "A", matchCount: result.report.matches.length };
+      }
+      if (data.scenario === "B") {
+        await svc.seedScenarioB();
+        return { success: true, scenario: "B" };
+      }
+      if (data.scenario === "C") {
+        await svc.seedScenarioC();
+        return { success: true, scenario: "C" };
+      }
     } catch (error) {
       wrapError(`run scenario ${data.scenario}`, error);
     }

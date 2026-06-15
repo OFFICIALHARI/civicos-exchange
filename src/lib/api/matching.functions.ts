@@ -38,8 +38,6 @@ export type BookingResponse = {
   score: number;
   status: string;
   timestamp: string;
-  createdAt: string;
-  updatedAt: string;
 };
 
 export type LedgerEntryResponse = {
@@ -55,6 +53,8 @@ export type LedgerEntryResponse = {
 
 export type MatchResponse = {
   id: string;
+  resourceId: string;
+  requestId: string;
   resourceTitle: string;
   requesterName: string;
   confidence: number;
@@ -90,8 +90,6 @@ function serializeBooking(booking: BookingDocument): BookingResponse {
     score: booking.score,
     status: booking.status,
     timestamp: booking.timestamp.toISOString(),
-    createdAt: booking.createdAt.toISOString(),
-    updatedAt: booking.updatedAt.toISOString(),
   };
 }
 
@@ -116,15 +114,16 @@ function serializeReport(report: MatchExecutionReport): MatchExecutionReportResp
   };
 }
 
-export const executeMatchingCycle = createServerFn({ method: "POST" })
-  .handler(async (): Promise<MatchExecutionReportResponse> => {
+export const executeMatchingCycle = createServerFn({ method: "POST" }).handler(
+  async (): Promise<MatchExecutionReportResponse> => {
     try {
       const { executeMatchingCycle: serviceFn } = await loadMatchExecutionService();
       return serializeReport(await serviceFn());
     } catch (error) {
       wrapError("execute matching cycle", error);
     }
-  });
+  },
+);
 
 export const executeMatchingForRequest = createServerFn({ method: "POST" })
   .inputValidator(z.object({ requestId: requestIdSchema }))
@@ -132,7 +131,7 @@ export const executeMatchingForRequest = createServerFn({ method: "POST" })
     try {
       const { executeMatchingForRequest: serviceFn } = await loadMatchExecutionService();
       const { findById } = await loadRequestRepository();
-      
+
       const request = await findById(data.requestId);
       if (!request) {
         throw new Error(`Request with id ${data.requestId} not found.`);
@@ -155,15 +154,15 @@ export const generateExecutionSummary = createServerFn({ method: "POST" })
     }
   });
 
-export const getRecentMatches = createServerFn({ method: "POST" })
-  .handler(async (): Promise<MatchResponse[]> => {
+export const getRecentMatches = createServerFn({ method: "POST" }).handler(
+  async (): Promise<MatchResponse[]> => {
     try {
       const { findAll: findBookings } = await loadBookingRepository();
       const { findById: findResource } = await loadResourceRepository();
       const { findById: findRequest } = await loadRequestRepository();
 
       const bookings = await findBookings();
-      
+
       const enrichedMatches = await Promise.all(
         bookings.slice(0, 10).map(async (b) => {
           const [resource, request] = await Promise.all([
@@ -173,23 +172,22 @@ export const getRecentMatches = createServerFn({ method: "POST" })
 
           return {
             id: b._id.toHexString().slice(-6).toUpperCase(),
+            resourceId: b.resourceId.toHexString(),
+            requestId: b.requestId.toHexString(),
             resourceTitle: resource?.title || "Unknown Resource",
             requesterName: "Requester", // User entity join not fully implemented
             confidence: b.score,
-            reason: [
-              "Optimized location matching",
-              "Price within window",
-              "Priority allocation",
-            ],
+            reason: ["Optimized location matching", "Price within window", "Priority allocation"],
             matchedPrice: b.matchedPrice,
             status: b.status === "active" ? "matched" : "confirmed",
             timestamp: b.timestamp.toISOString(),
           };
-        })
+        }),
       );
 
       return enrichedMatches;
     } catch (error) {
       wrapError("fetch recent matches", error);
     }
-  });
+  },
+);
