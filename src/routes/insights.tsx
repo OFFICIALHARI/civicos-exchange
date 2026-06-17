@@ -62,7 +62,7 @@ function Insights() {
               ))}
             </div>
           ) : !insights || insights.length === 0 ? (
-            <EmptyState title="No active insights" subtitle="The engine is currently gathering more data for new recommendations." />
+            <EmptyState title="No active insights" description="The engine is currently gathering more data for new recommendations." />
           ) : (
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
               {insights.map((i) => (

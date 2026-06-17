@@ -46,10 +46,10 @@ RESOURCE BREAKDOWN:
 - Community Rooms: ${summary.resourceBreakdown.room}
 
 RECENT LEDGER TRANSACTIONS (Last 5):
-${ledger.slice(0, 5).map(l => `- Match Score: ${(l.score * 100).toFixed(1)}%, Price: ₹${l.matchedPrice}, Status: ${l.status}`).join('\n')}
+${ledger.slice(0, 5).map(l => `- Match Score: ${(l.score * 100).toFixed(1)}%, Price: ₹${l.matchedPrice}`).join('\n')}
 
 HISTORICAL SNAPSHOTS (Last ${history.length} periods):
-${history.map((h, i) => `[Period ${i + 1}] Util: ${(h.utilizationPercentage * 100).toFixed(1)}%, Demand: ${h.demandPressure.toFixed(2)}x, Rev: ₹${h.revenue}`).join('\n')}
+${history.map((h, i) => `[Period ${i + 1}] Util: ${(h.utilizationPercentage * 100).toFixed(1)}%, Demand: ${h.demandPressure.toFixed(2)}x`).join('\n')}
 
 Provide your analysis in the following strict JSON format without any markdown wrappers (no \`\`\`json):
 {
@@ -106,3 +106,4 @@ Provide your analysis in the following strict JSON format without any markdown w
     return null;
   }
 }
+

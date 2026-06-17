@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import process from "node:process";
+import { getServerConfig } from "@/lib/config.server";
 
 async function loadValidationService() {
   return import("@/server/services/validation.service");
@@ -15,8 +16,8 @@ function wrapError(operation: string, error: unknown): never {
 }
 
 function verifySecret(secret?: string) {
-  const envSecret = process.env.ADMIN_SECRET || "civicos-dev-secret";
-  if (secret !== envSecret) {
+  const { adminSecret } = getServerConfig();
+  if (secret !== adminSecret) {
     throw new Error("Unauthorized: Invalid admin secret.");
   }
 }

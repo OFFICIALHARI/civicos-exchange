@@ -67,7 +67,7 @@ function Resources() {
           </div>
         ) : !data || data.length === 0 ? (
           <div className="py-12 flex justify-center">
-            <EmptyState title="No resources found" subtitle="Start by adding your community's first shared resource." />
+            <EmptyState title="No resources found" description="Start by adding your community's first shared resource." />
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

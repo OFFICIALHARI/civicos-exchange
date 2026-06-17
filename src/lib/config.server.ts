@@ -33,6 +33,7 @@ export function getServerConfig() {
     nodeEnv: process.env.NODE_ENV,
     mongodbUri: readRequiredEnv("MONGODB_URI"),
     databaseName: readRequiredEnv("DATABASE_NAME"),
+    adminSecret: readRequiredEnv("ADMIN_SECRET"),
   };
 
   return config;

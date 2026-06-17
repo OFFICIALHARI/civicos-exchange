@@ -108,7 +108,7 @@ export function LedgerTable({
         <div className="py-20 flex justify-center bg-surface/10">
           <EmptyState
             title="No records found"
-            subtitle="Confirmed allocations will appear in this audit trail once settled."
+            description="Confirmed allocations will appear in this audit trail once settled."
           />
         </div>
       )}
